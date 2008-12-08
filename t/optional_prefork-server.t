@@ -14,6 +14,9 @@ plan skip_all => 'set TEST_PREFORK to enable this test' unless $ENV{TEST_PREFORK
 plan skip_all => 'File::Copy::Recursive required' if $@;
 plan tests => 1;
 
+# Run a single test by providing it as the first arg
+my $single_test = shift;
+
 # clean up
 rmtree "$FindBin::Bin/../t/tmp" if -d "$FindBin::Bin/../t/tmp";
 
@@ -34,7 +37,7 @@ unlink 't/tmp/TestApp/lib/TestApp/Controller/Root.pm';
 # spawn the standalone Prefork server
 my $port = 30000 + int rand(1 + 10000);
 my $pid = open my $server, 
-    "perl -I$FindBin::Bin/../lib $FindBin::Bin/../t/tmp/TestApp/script/testapp_prefork.pl -port $port 2>&1 |"
+    "$^X -I$FindBin::Bin/../lib $FindBin::Bin/../t/tmp/TestApp/script/testapp_prefork.pl -port $port 2>&1 |"
     or die "Unable to spawn standalone Prefork server: $!";
 
 # wait for it to start
@@ -45,7 +48,13 @@ while ( check_port( 'localhost', $port ) != 1 ) {
 
 # run the testsuite against the Prefork server
 $ENV{CATALYST_SERVER} = "http://localhost:$port";
-system( 'prove -r -Ilib/ t/live_*' );
+
+if ( $single_test ) {
+    system( "$^X -Ilib/ $single_test" );
+}
+else {
+    system( 'prove -r -Ilib/ t/live_*' );
+}
 
 # shut it down
 kill 'INT', $pid;

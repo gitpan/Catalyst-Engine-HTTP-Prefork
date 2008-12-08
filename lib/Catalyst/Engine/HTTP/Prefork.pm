@@ -17,7 +17,7 @@ use constant DEBUG        => $ENV{CATALYST_PREFORK_DEBUG} || 0;
 use constant CHUNKSIZE    => 64 * 1024;
 use constant READ_TIMEOUT => 5;
 
-our $VERSION = '0.01';
+our $VERSION = '0.50';
 
 sub run {
     my ( $self, $class, $port, $host, $options ) = @_;
@@ -35,15 +35,16 @@ sub run {
     @ARGV = @{ $options->{argv} };
     
     $self->SUPER::run(
-        port              => $port || 3000,
-        host              => $host || '*',
-        serialize         => 'flock',
-        log_level         => DEBUG ? 4 : 1,
-        min_servers       => $options->{min_servers}       || 5,
-        min_spare_servers => $options->{min_spare_servers} || 2,
-        max_spare_servers => $options->{max_spare_servers} || 10,
-        max_servers       => $options->{max_servers}       || 50,
-        max_reqeusts      => $options->{max_requests}      || 1000,
+        port                       => $port || 3000,
+        host                       => $host || '*',
+        serialize                  => 'flock',
+        log_level                  => DEBUG ? 4 : 1,
+        min_servers                => $options->{min_servers}       || 5,
+        min_spare_servers          => $options->{min_spare_servers} || 2,
+        max_spare_servers          => $options->{max_spare_servers} || 10,
+        max_servers                => $options->{max_servers}       || 50,
+        max_requests               => $options->{max_requests}      || 1000,
+        leave_children_open_on_hup => $options->{restart_graceful}  || 0,
     );
 }
 
@@ -377,6 +378,12 @@ Restart a child after it has served this many requests.  Defaults to 1000.
 Note that setting this value to 0 will not cause the child to serve unlimited
 requests.  This is a limitation of Net::Server and may be fixed in a future
 version.
+
+=head2 restart_graceful
+
+This enables Net::Server's leave_children_open_on_hup option.  If set, the parent
+will not attempt to close child processes if the parent receives a SIGHUP.  Each
+child will exit as soon as possible after processing the current request if any.
 
 =head1 AUTHOR
 
