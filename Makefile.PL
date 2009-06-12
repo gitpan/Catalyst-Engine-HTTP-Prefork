@@ -1,4 +1,4 @@
-use inc::Module::Install 0.65;
+use inc::Module::Install 0.87;
 
 name 'Catalyst-Engine-HTTP-Prefork';
 all_from 'lib/Catalyst/Engine/HTTP/Prefork.pm';
@@ -12,4 +12,6 @@ requires 'HTTP::HeaderParser::XS'   => '0.20';
 tests 't/0*.t';
 
 auto_install;
+resources repository => 'http://dev.catalyst.perl.org/repos/Catalyst/trunk/Catalyst-Engine-HTTP-Prefork/';
+
 WriteAll;
